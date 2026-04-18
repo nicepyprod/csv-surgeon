@@ -36,6 +36,9 @@ csv-surgeon filter --file data.csv --where "country == US" --out filtered.csv
 
 # Preview the first 10 rows without loading the full file
 csv-surgeon peek --file data.csv --rows 10
+
+# Count rows matching a condition
+csv-surgeon count --file data.csv --where "status == active"
 ```
 
 All operations are **streaming** — csv-surgeon processes files line by line, making it suitable for files too large to fit in memory.
