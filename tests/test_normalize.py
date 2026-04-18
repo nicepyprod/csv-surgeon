@@ -64,3 +64,11 @@ def test_normalize_columns_preserves_other_fields():
     result = list(normalize_columns(_rows(), {"tag": "slug"}))
     assert result[1]["name"] == "BOB"
     assert result[1]["city"] == "los angeles"
+
+
+def test_normalize_column_does_not_mutate_original():
+    """normalize_column should yield new row dicts, not mutate the originals."""
+    rows = _rows()
+    original_name = rows[0]["name"]
+    list(normalize_column(rows, "name", "strip"))
+    assert rows[0]["name"] == original_name
