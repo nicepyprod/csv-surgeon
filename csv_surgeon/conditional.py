@@ -56,8 +56,39 @@ def map_values(
     mapping: Dict[str, str],
     default: str = "",
 ) -> Iterator[Dict[str, str]]:
-    """Replace values in *column* using a lookup *mapping*."""
+    """Replace values in *column* using a lookup *mapping*.
+
+    If a value is not found in *mapping* and *default* is empty, the original
+    cell value is preserved.  Supply an explicit *default* to override unmapped
+    values with a fixed string instead.
+    """
     for row in rows:
         out = dict(row)
         out[column] = mapping.get(out.get(column, ""), default or out.get(column, ""))
+        yield out
+
+
+def case_when(
+    rows: Iterable[Dict[str, str]],
+    cases: List[tuple[Callable[[Dict[str, str]], bool], str]],
+    column: str,
+    default: str = "",
+) -> Iterator[Dict[str, str]]:
+    """Set *column* by evaluating a list of (predicate, value) pairs in order.
+
+    The first predicate that returns ``True`` determines the value written to
+    *column*.  If no predicate matches, *default* is used.
+
+    Args:
+        rows: Iterable of row dicts.
+        cases: Ordered list of ``(predicate, value)`` pairs.
+        column: Name of the column to set.
+        default: Value to use when no predicate matches.
+    """
+    for row in rows:
+        out = dict(row)
+        out[column] = next(
+            (value for predicate, value in cases if predicate(out)),
+            default,
+        )
         yield out
