@@ -35,6 +35,12 @@ def test_cumulative_sum_preserves_other_columns():
     assert result[3]["name"] == "d"
 
 
+def test_cumulative_sum_all_empty():
+    rows = [{"val": ""}, {"val": ""}]
+    result = list(cumulative_sum(iter(rows), "val"))
+    assert all(r["val_cumsum"] == "" for r in result)
+
+
 def test_cumulative_mean_basic():
     result = list(cumulative_mean(iter(_rows()), "val"))
     assert result[0]["val_cummean"] == "3.0"
@@ -71,6 +77,14 @@ def test_cumulative_min_basic():
 def test_cumulative_min_custom_out_column():
     result = list(cumulative_min(iter(_rows()), "val", out_column="low"))
     assert result[1]["low"] == "1.0"
+
+
+def test_cumulative_min_empty_start():
+    rows = [{"v": ""}, {"v": "5"}, {"v": "3"}]
+    result = list(cumulative_min(iter(rows), "v"))
+    assert result[0]["v_cummin"] == ""
+    assert result[1]["v_cummin"] == "5.0"
+    assert result[2]["v_cummin"] == "3.0"
 
 
 def test_cumulative_does_not_mutate_input():
