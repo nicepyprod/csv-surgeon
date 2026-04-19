@@ -51,6 +51,19 @@ def test_detect_respects_sample_limit():
     assert result['v'] == 'int'
 
 
+def test_detect_multiple_columns():
+    """Each column should be inferred independently."""
+    rows = _rows(
+        {'id': '1', 'score': '9.5', 'name': 'Alice', 'active': 'true'},
+        {'id': '2', 'score': '8.0', 'name': 'Bob',   'active': 'false'},
+    )
+    result = detect_column_types(rows)
+    assert result['id'] == 'int'
+    assert result['score'] == 'float'
+    assert result['name'] == 'str'
+    assert result['active'] == 'bool'
+
+
 def test_type_report_structure():
     rows = _rows({'a': '1', 'b': 'hello'}, {'a': '2', 'b': 'world'})
     report = type_report(rows)
