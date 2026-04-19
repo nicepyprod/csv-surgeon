@@ -8,9 +8,26 @@ from csv_surgeon.reader import stream_rows
 
 
 def cmd_diff(ns: argparse.Namespace) -> None:
-    left_rows = list(stream_rows(ns.left, delimiter=ns.delimiter))
-    right_rows = list(stream_rows(ns.right, delimiter=ns.delimiter))
+    try:
+        left_rows = list(stream_rows(ns.left, delimiter=ns.delimiter))
+        right_rows = list(stream_rows(ns.right, delimiter=ns.delimiter))
+    except FileNotFoundError as e:
+        print(f"error: {e}", file=sys.stderr)
+        sys.exit(1)
+
     key_cols = ns.key.split(",")
+
+    # Validate that key columns exist in both files
+    if left_rows:
+        missing = [c for c in key_cols if c not in left_rows[0]]
+        if missing:
+            print(f"error: key column(s) not found in left file: {', '.join(missing)}", file=sys.stderr)
+            sys.exit(1)
+    if right_rows:
+        missing = [c for c in key_cols if c not in right_rows[0]]
+        if missing:
+            print(f"error: key column(s) not found in right file: {', '.join(missing)}", file=sys.stderr)
+            sys.exit(1)
 
     if ns.summary:
         s = diff_summary(iter(left_rows), iter(right_rows), key_cols)
