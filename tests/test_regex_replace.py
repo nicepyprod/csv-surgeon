@@ -74,3 +74,14 @@ def test_extract_column_full_match_group0():
         regex_extract_column(_rows(), "email", r"\w+@\w+\.com", "full_email", group=0)
     )
     assert result[0]["full_email"] == "alice@example.com"
+
+
+def test_extract_column_overwrites_existing_dest():
+    """If the destination column already exists, it should be overwritten."""
+    rows = [
+        {"email": "alice@example.com", "domain": "old_value"},
+    ]
+    result = list(
+        regex_extract_column(rows, "email", r"@(\w+)\.com", "domain", group=1)
+    )
+    assert result[0]["domain"] == "example"
