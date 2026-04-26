@@ -46,8 +46,16 @@ def transform_inplace(
 
     Returns:
         Number of rows written (excluding dropped rows).
+
+    Raises:
+        FileNotFoundError: If *filepath* does not exist.
+        Exception: Any exception raised by *transform* causes the temporary
+                   file to be cleaned up before re-raising.
     """
     filepath = Path(filepath)
+    if not filepath.exists():
+        raise FileNotFoundError(f"No such file: '{filepath}'")
+
     dir_ = filepath.parent
     written = 0
 
