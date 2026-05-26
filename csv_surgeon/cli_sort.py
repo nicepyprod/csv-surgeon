@@ -1,17 +1,17 @@
 """CLI sub-command for sorting CSV files."""
 import argparse
 import csv
-import sys
 
-from csv_surgeon.reader import stream_rows
 from csv_surgeon.sort import sort_rows, sort_rows_multi
-from csv_surgeon.writer import write_rows
 
 
 def cmd_sort(args: argparse.Namespace) -> None:
     keys = args.key  # list of column names
     numeric_keys = args.numeric or []
-    rows = list(stream_rows(args.input, delimiter=args.delimiter))
+    with open(args.input, newline="", encoding="utf-8") as fh:
+        reader = csv.DictReader(fh, delimiter=args.delimiter)
+        fieldnames = list(reader.fieldnames or [])
+        rows = list(reader)
     if not rows:
         return
 
@@ -26,9 +26,11 @@ def cmd_sort(args: argparse.Namespace) -> None:
                             numeric_keys=numeric_keys)
         )
 
-    fieldnames = list(rows[0].keys())
     out = args.output or args.input
-    write_rows(out, sorted_rows, fieldnames=fieldnames, delimiter=args.delimiter)
+    with open(out, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames, delimiter=args.delimiter)
+        writer.writeheader()
+        writer.writerows(sorted_rows)
 
 
 def register_sort_parser(subparsers) -> None:
