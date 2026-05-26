@@ -59,3 +59,15 @@ def test_sort_multi_key(sample_csv):
     cmd_sort(NS(input=sample_csv, key=["city", "name"]))
     rows = _read(sample_csv)
     assert rows[0]["city"] == "Amsterdam"
+
+
+def test_sort_crlf_input_strips_carriage_returns(tmp_path):
+    data = tmp_path / "data.csv"
+    out = tmp_path / "sorted.csv"
+    data.write_bytes(b"name,age\r\njohn,30\r\nalice,25\r\n")
+
+    cmd_sort(NS(input=str(data), key=["age"], numeric=["age"], output=str(out)))
+
+    rows = _read(out)
+    assert [row["age"] for row in rows] == ["25", "30"]
+    assert all("\r" not in value for row in rows for value in row.values())
